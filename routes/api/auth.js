@@ -10,7 +10,7 @@ const User = require('../../models/User');
 
 
 // @route    GET api/auth
-// @desc     get authenticated user
+// @desc     Uses auth middleware to authenticate user with token
 // @access   PRIVATE
 router.get('/', auth, async (req, res) => {
     try {
@@ -25,7 +25,7 @@ router.get('/', auth, async (req, res) => {
 
 
 // @route    POST api/auth
-// @desc     Authenticate user & get token
+// @desc     Authenticate user for login & get token
 // @access   PUBLIC
 router.post('/', [
     check('email', 'Please include a valid email')
