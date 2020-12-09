@@ -28,6 +28,29 @@ router.get('/current', auth, async (req, res) => {
     }
 });
 
+// @route    GET api/appts/:id
+// @desc     Get appointment by id
+// @access   PRIVATE
+router.get('/:id', auth, async (req, res) => {
+    try {
+        const appt = await Appt.findById(req.params.id);
+
+        if (!appt) {
+            return res.status(404).json({ msg: 'Appointment not found' });
+        }
+
+        res.json(appt);
+
+    } catch(err) {
+        console.error(err.message);
+        if (err.kind === 'ObjectId') {
+            return res.status(404).json({ msg: 'Appointment not found' });
+        }
+        res.status(500).send('Server Error');
+    }
+});
+
+
 
 
 // @route    GET api/appts
@@ -40,7 +63,7 @@ router.get('/', auth, async (req, res) => {
         const appts = await Appt.find({}); 
 
         if (appts.length === 0) {
-            return res.status(400).json({ msg: "no appointments for user" });
+            return res.status(400).json({ msg: "No appointments found" });
         }
 
         return res.json(appts);
@@ -103,6 +126,31 @@ async (req, res) => {
         res.status(500).send('Server Error');
     }
 
+});
+
+// @route    DELETE api/appts/:id
+// @desc     DELETE appointment by id
+// @access   PRIVATE
+router.delete('/:id', auth, async (req, res) => {
+    try {
+        const appt = await Appt.findById(req.params.id);
+
+        // Check user
+        if (appt.user === req.user.id) {
+            return res.status(401).json({ msg: 'User not authorized' });
+        }
+
+        await appt.remove();
+
+        res.json({msg: "Appointment removed"});
+
+    } catch(err) {
+        console.error(err.message);
+        if (err.kind === 'ObjectId') {
+            return res.status(404).json({ msg: 'Appointment not found' });
+        }
+        res.status(500).send('Server Error');
+    }
 });
 
 module.exports = router;
